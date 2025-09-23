@@ -1,0 +1,8 @@
+server:
+  port: 8080
+
+fabrick:
+  base-url: https://sandbox.platfr.io
+  api-key: FXOVVXXHVCPVPBZXIJOBGUGSKHDNFRRQJP
+  auth-schema: S2S
+  X-Time-Zone: Europe/Rome
