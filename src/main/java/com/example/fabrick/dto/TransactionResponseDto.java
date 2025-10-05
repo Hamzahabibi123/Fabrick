@@ -8,6 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class TransactionResponseDto {
+
     @JsonProperty("payload")
     private TransactionsPayloadDto payload;
 

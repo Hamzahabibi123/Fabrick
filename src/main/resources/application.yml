@@ -6,3 +6,7 @@ fabrick:
   api-key: FXOVVXXHVCPVPBZXIJOBGUGSKHDNFRRQJP
   auth-schema: S2S
   X-Time-Zone: Europe/Rome
+  account-id: 14537780
+  balance-path: "/api/gbs/banking/v4.0/accounts/{accountId}/balance"
+  transactions-path: "/api/gbs/banking/v4.0/accounts/{accountId}/transactions"
+  money-transfer-path: "/api/gbs/banking/v4.0/accounts/{accountId}/payments/money-transfers"
