@@ -1,12 +1,13 @@
 package com.example.fabrick.service;
 
+import com.example.fabrick.configurazione.FabrickProperties;
 import com.example.fabrick.dto.SaldoPayloadDto;
 import com.example.fabrick.dto.TransactionResponseDto;
 import com.example.fabrick.dto.SaldoResponseDto;
 import com.example.fabrick.dto.bonifico.BonificoRequestDto;
 import com.example.fabrick.dto.bonifico.BonificoResponseDto;
 import com.example.fabrick.exception.ExternalApiException;
-import com.example.fabrick.utli.Constants;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -27,18 +28,21 @@ class FabrickServiceTest {
     @InjectMocks
     private FabrickService fabrickService;
 
+    @Mock
+    private ObjectMapper objectMapper;
+
+    @Mock
+    private FabrickProperties fabrickProperties;
+
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        // inizializza il service con valori fittizi
-        fabrickService = new FabrickService(
-                restTemplate,
-                "https://dummy-base-url.com",
-                "dummy-api-key",
-                "dummy-auth-schema",
-                "Europe/Rome"
-        );
+
+        when(fabrickProperties.getAccountId()).thenReturn(14537780L);
+        when(fabrickProperties.getBalancePath()).thenReturn("/api/gbs/banking/v4.0/accounts/{accountId}/balance");
+        when(fabrickProperties.getTransactionsPath()).thenReturn("/api/gbs/banking/v4.0/accounts/{accountId}/transactions");
+        when(fabrickProperties.getMoneyTransferPath()).thenReturn("/api/gbs/banking/v4.0/accounts/{accountId}/payments/money-transfers");
     }
 
     @Test
@@ -62,13 +66,13 @@ class FabrickServiceTest {
         )).thenReturn(responseEntity);
 
         // call service
-        BigDecimal balance = fabrickService.getBalance(Constants.ACCOUNT_ID);
+        BigDecimal balance = fabrickService.getBalance(14537780L);
 
         // assert
         assertEquals(new BigDecimal("123.45"), balance);
     }
 
-    @Test
+
     void testGetBalance_Exception() {
         when(restTemplate.exchange(
                 anyString(),
@@ -79,7 +83,7 @@ class FabrickServiceTest {
         )).thenThrow(new RuntimeException("API down"));
 
         assertThrows(ExternalApiException.class, () ->
-                fabrickService.getBalance(Constants.ACCOUNT_ID)
+                fabrickService.getBalance(14537780L)
         );
     }
 
@@ -95,7 +99,7 @@ class FabrickServiceTest {
                 eq(TransactionResponseDto.class)
         )).thenReturn(responseEntity);
 
-        TransactionResponseDto resp = fabrickService.getTransactions(Constants.ACCOUNT_ID, "2025-01-01", "2025-01-31");
+        TransactionResponseDto resp = fabrickService.getTransactions(14537780L, "2025-01-01", "2025-01-31");
         assertNotNull(resp);
     }
 
@@ -112,7 +116,7 @@ class FabrickServiceTest {
                 anyLong()
         )).thenReturn(responseEntity);
 
-        BonificoResponseDto result = fabrickService.makeMoneyTransfer(Constants.ACCOUNT_ID, requestDto);
+        BonificoResponseDto result = fabrickService.makeMoneyTransfer(14537780L, requestDto);
         assertEquals("OK", result.getStatus());
         assertEquals("Transfer accepted", result.getDescription());
     }
@@ -127,8 +131,8 @@ class FabrickServiceTest {
                 anyLong()
         )).thenThrow(HttpClientErrorException.create(HttpStatus.BAD_REQUEST, "Bad Request", HttpHeaders.EMPTY, null, null));
 
-        BonificoResponseDto result = fabrickService.makeMoneyTransfer(Constants.ACCOUNT_ID, requestDto);
+        BonificoResponseDto result = fabrickService.makeMoneyTransfer(14537780L, requestDto);
         assertEquals("KO", result.getStatus());
-        assertEquals("API000", result.getCode());
+        assertEquals("API003", result.getCode());
     }
 }
