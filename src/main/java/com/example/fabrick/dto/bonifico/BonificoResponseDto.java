@@ -20,4 +20,7 @@ public class BonificoResponseDto {
         this.description=description;
     }
 
+    //lo aggiungo per i test sul AccountControllerTEst
+    public BonificoResponseDto() {}
+
 }
